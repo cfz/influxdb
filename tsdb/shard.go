@@ -1600,6 +1600,8 @@ type MeasurementFieldSet struct {
 
 	// path is the location to persist field sets
 	path string
+
+	lastUpdate time.Time
 }
 
 // NewMeasurementFieldSet returns a new instance of MeasurementFieldSet.
@@ -1694,6 +1696,14 @@ func (fs *MeasurementFieldSet) IsEmpty() bool {
 func (fs *MeasurementFieldSet) Save() error {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
+
+	// pass min interval?
+	now := time.Now()
+	if fs.lastUpdate.Add(1 * time.Second).After(now) {
+		return nil
+	}
+
+	fs.lastUpdate = now
 
 	return fs.saveNoLock()
 }
